@@ -9,15 +9,25 @@ import { AiOutlineSearch } from 'react-icons/ai'
 import {FaBed, FaSquareFull} from 'react-icons/fa'
 import person from '../../assets/person.jpg'
 
-
-
-const Properties = () => {
+const Properties = ({data}) => {
   const [allProperties, setAllProperties] = useState([])
   const [filteredProperties, setFilteredProperties] = useState([])
   const [state, setState] = useState(null)
-  const query = (useLocation().search).slice(1) //slice(1) gets rid of ?
+  const query = (useLocation().search).slice(1)
+  const [inputQuery, setInputQuery] = useState("")
   const arrQuery = query.split("&")
   const navigate = useNavigate()
+
+
+
+  const handleInputChange = (event) => {
+    setInputQuery(event.target.value);
+}
+
+
+
+
+
 
 
   const handleState = (e) => {
@@ -32,69 +42,124 @@ const Properties = () => {
 
   // fetch all properties
   useEffect(() => {
+    let filterState = idxToState(query.split("=")[1])
     const fetchAllProperties = async() => {
       const data = await request(`/property/getAll`, 'GET')
       setAllProperties(data)
+      filterProperty(data, filterState)
+      // handleSearch(data)
     }
     fetchAllProperties()
+    
   }, [])
 
+
+  //parsing query
+  
+
+
+
+
   //parsing query params
-  useEffect(() => {
-    if(arrQuery && allProperties?.length > 0 && state === null){
-      let formattedQuery = {}
+  // useEffect(() => {
+  //   if(arrQuery && allProperties?.length > 0 && state === null){
+  //     let formattedQuery = {}
 
-      arrQuery.forEach((option, idx) => { 
-        const key = option.split("=")[0]
-        const value = option.split("=")[1]
+  //     arrQuery.forEach((option, idx) => { 
+  //       const key = option.split("=")[0]
+  //       const value = option.split("=")[1]
 
-        formattedQuery = {...formattedQuery, [key]: value}
-      // if we are on the last index, assign the formattedQuery object to state
-      if(idx === arrQuery.length -1){
-        setState(formattedQuery)
-        handleSearch(formattedQuery)
-      }
-      })
-    }
-  }, [allProperties, arrQuery])
+  //       formattedQuery = {...formattedQuery, [key]: value}
+  //     // if we are on the last index, assign the formattedQuery object to state
+  //     if(idx === arrQuery.length -1){
+  //       setState(formattedQuery)
+  //       handleSearch(formattedQuery)
+  //     }
+  //     })
+  //   }
+  // }, [allProperties, arrQuery])
 
-  const handleSearch = (param = state) => {
-    let options
-    // we either pass the formattedObj or event, thats why we do the if/else
-    if(param?.nativeEvent){
-      options = state
-    } else {
-      options = param
-    }
+  // const handleSearch = (param = state) => {
+  //   let options
+  //   // we either pass the formattedObj or event, thats why we do the if/else
+  //   if(param?.nativeEvent){
+  //     options = state
+  //   } else {
+  //     options = param
+  //   }
 
 
-    const filteredProperties = allProperties.filter((property) => {
-      //options.priceRange === 1 arrPriceRanges[1] = second element => "100000-200000"
-      const priceRange = arrPriceRanges[options.priceRange]
-      const minPrice = Number(priceRange.split('-')[0])
-      const maxPrice = Number(priceRange.split('-')[1])
-      const state = stateToIdx(property.state)
+  //   const filteredProperties = allProperties.filter((property) => {
+  //     //options.priceRange === 1 arrPriceRanges[1] = second element => "100000-200000"
+  //     const priceRange = arrPriceRanges[options.priceRange]
+  //     const minPrice = Number(priceRange.split('-')[0])
+  //     const maxPrice = Number(priceRange.split('-')[1])
+  //     const state = stateToIdx(property.state)
       
-      if(property.type === options.type && state === Number(options.state) && property.price >= minPrice && property.price <= maxPrice){
-        return property
+  //     if(property.type === options.type && state === Number(options.state) && property.price >= minPrice && property.price <= maxPrice){
+  //       return property
         
 
-      }
-    })
+  //     }
+  //   })
 
-    const queryStr = `type=${options.type}&state=${options.state}&priceRange=${options.priceRange}`
+  //   const queryStr = `type=${options.type}&state=${options.state}&priceRange=${options.priceRange}`
 
-    navigate(`/properties?${queryStr}`, {replace: true})
-    setFilteredProperties(filteredProperties)
+  //   navigate(`/properties?${queryStr}`, {replace: true})
+  //   setFilteredProperties(filteredProperties)
+  // }
+
+
+ const handleSearch = (properties) => {
+  let state = stateToIdx(inputQuery)
+  navigate(`/properties?state=${state}`)
+  filterProperty(allProperties, inputQuery)
+  // console.log(query)
+  // let filterState = idxToState(query.split("=")[1])
+  // let filtered = []
+  //   if(query){
+  //     filtered = properties.filter(
+  //       (property) => property.state.toLowerCase().indexOf(filterState.toLowerCase()) !== -1)
+  //   }
+
+  //   setFilteredProperties(filtered)
+
+
+  
+ }
+
+ const filterProperty = (properties, state, selected) => {
+  let filterState = idxToState(query.split("=")[1])
+  let filteredProperties = properties
+  if (query) {
+    filteredProperties = properties.filter(
+      (property) => property.state.toLowerCase().indexOf(filterState.toLowerCase()) !== -1)
   }
+
+  // Applying selected filter
+  if (selected) {
+    filteredProperties = filteredProperties.filter(
+      ({sqmeters, price, beds, bathrooms}) =>
+        sqmeters === selected ||
+        price === selected ||
+        beds === selected ||
+        bathrooms === selected
+    );
+  }
+
+  setFilteredProperties(filteredProperties)
+
+ }
 
 
 
   return (
     <div className={classes.container}>
+      <div>{data}</div>
       <div className={classes.wrapper}>
       <div className={classes.options}>
-          <select value={state?.type} name="type" onChange={handleState}>
+        <input type="text" onChange={handleInputChange} placeholder="enter search" />
+          {/* <select value={state?.type} name="type" onChange={handleState}>
             <option disabled>Select Type</option>
             <option value="Beach">Beach</option>
             <option value="Mountain">Mountain</option>
@@ -160,9 +225,9 @@ const Properties = () => {
               <option value="47">West Virginia</option>
               <option value="48">Wisconsin</option>
               <option value="49">Wyoming</option>    
-              </select>
+              </select> */}
               <button className={classes.searchBtn}>
-              <AiOutlineSearch onClick={handleSearch} className={classes.searchIcon}/> 
+              <AiOutlineSearch onClick={() => handleSearch(allProperties)} className={classes.searchIcon}/> 
               </button>
           </div> 
         {filteredProperties?.length > 0 ? (
@@ -179,7 +244,7 @@ const Properties = () => {
                 </Link>
                 <div className={classes.details}>
                   <div className={classes.priceAndOwner}>
-                    <span className={classes.price}>$ {property.price}</span>
+                    <span className={classes.price}>${property.price}</span>
                     <img src={person} className={classes.owner} />
                   </div>
                   <div className={classes.moreDetails}>
@@ -192,7 +257,7 @@ const Properties = () => {
             ))}
           </div>
           </>
-        ) : <h2 className={classes.noProperty}>We hace no properties with the specified options</h2>}
+        ) : <h2 className={classes.noProperty}>We have no properties with the specified options</h2>}
       </div>
     </div>
   )

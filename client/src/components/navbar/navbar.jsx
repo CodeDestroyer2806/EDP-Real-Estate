@@ -16,6 +16,8 @@ import {GiHamburgerMenu} from 'react-icons/gi'
 const Navbar = () => {
     const [state, setState] = useState({})
     const [photo, setPhoto] = useState("")
+    const [floorPlan1, setFloorPlan1] = useState("")
+    const [floorPlan2, setFloorPlan2] = useState("")
     const [showForm, setShowForm] = useState(false)
     const {user, token} = useSelector((state) => state.auth)
     const [showMobileNav, setShowMobileNav] = useState(false)
@@ -39,6 +41,8 @@ const Navbar = () => {
     const handleCloseForm = () => {
         setShowForm(false)
         setPhoto(null)
+        setFloorPlan1(null)
+        setFloorPlan2(null)
         setState({})
     }
 
@@ -46,11 +50,27 @@ const Navbar = () => {
     const handleListProperty = async(e) => {
         e.preventDefault()
         let filename = null
+        let filenameFloorPlan1 = null
+        let filenameFloorPlan2 = null
         if(photo){
             const formData = new FormData()
             filename = crypto.randomUUID() + photo.name
             formData.append('filename', filename)
             formData.append('image', photo)
+            await request('/upload/image', "POST", {}, formData, true)
+        }
+        if(floorPlan1){
+            const formData = new FormData()
+            filenameFloorPlan1 = crypto.randomUUID() + photo.name
+            formData.append('filename', filenameFloorPlan1)
+            formData.append('image', floorPlan1)
+            await request('/upload/image', "POST", {}, formData, true)
+        }
+        if(floorPlan2){
+            const formData = new FormData()
+            filenameFloorPlan2 = crypto.randomUUID() + photo.name
+            formData.append('filename', filenameFloorPlan2)
+            formData.append('image', floorPlan2)
             await request('/upload/image', "POST", {}, formData, true)
         }
         else{    
@@ -63,7 +83,7 @@ const Navbar = () => {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
-            await request('/property', 'POST', options, {...state, img: filename})
+            await request('/property', 'POST', options, {...state, img: filename, floorPlan1: filenameFloorPlan1, floorPlan2: filenameFloorPlan2})
             handleCloseForm()
         } catch (error) {
             console.log(error)
@@ -113,6 +133,7 @@ const Navbar = () => {
                                 <input type="text" placeholder='Type...' name="type"  onChange={handleState}/>
                                 <input type="text" placeholder='Desc...' name="desc"  onChange={handleState}/>
                                 <input type="text" placeholder='State...' name="state"  onChange={handleState}/>
+                                <input type="text" placeholder='City...' name="city"  onChange={handleState}/>
                                 <input type="number" placeholder='Zip Code...' name="zipCode"  onChange={handleState}/>
                                 <input type="number" placeholder='Price...' name="price"  onChange={handleState}/>
                                 <input type="number" placeholder='Sq. Meters' name="sqmeters"  onChange={handleState}/>
@@ -126,6 +147,24 @@ const Navbar = () => {
                                      onChange={(e) => setPhoto(e.target.files[0])}
                                     />
                                     {photo && <p>{photo.name}</p>}
+                                </div>
+                                <div style={{display: "flex", alignItems: "center", gap: '12px', width: '50%'}}>
+                                    <label htmlFor="floorPlan1">Floor Plan 1<AiOutlineFileImage/></label>
+                                    <input type="file"
+                                     id="floorPlan1" 
+                                     style={{display: "none"}} 
+                                     onChange={(e) => setFloorPlan1(e.target.files[0])}
+                                    />
+                                    {floorPlan1 && <p>{floorPlan1.name}</p>}
+                                </div>
+                                <div style={{display: "flex", alignItems: "center", gap: '12px', width: '50%'}}>
+                                    <label htmlFor="floorPlan2">Floor Plan2<AiOutlineFileImage/></label>
+                                    <input type="file"
+                                     id="floorPlan2" 
+                                     style={{display: "none"}} 
+                                     onChange={(e) => setFloorPlan2(e.target.files[0])}
+                                    />
+                                    {floorPlan2 && <p>{floorPlan2.name}</p>}
                                 </div>
                                 <button>List Property</button>
                             </form>
@@ -173,6 +212,7 @@ const Navbar = () => {
                                 <input type="text" placeholder='Type...' name="type"  onChange={handleState}/>
                                 <input type="text" placeholder='Desc...' name="desc"  onChange={handleState}/>
                                 <input type="text" placeholder='State...' name="state"  onChange={handleState}/>
+                                <input type="text" placeholder='City...' name="city"  onChange={handleState}/>
                                 <input type="number" placeholder='Zip Code...' name="zipcode"  onChange={handleState}/>
                                 <input type="number" placeholder='Price...' name="price"  onChange={handleState}/>
                                 <input type="number" placeholder='Sq. Meters' name="sqmeters"  onChange={handleState}/>
@@ -184,6 +224,24 @@ const Navbar = () => {
                                      id="photo" 
                                      style={{display: "none"}} 
                                      onChange={(e) => setPhoto(e.target.files[0])}
+                                    />
+                                    {photo && <p>{photo.name}</p>}
+                                </div>
+                                <div style={{display: "flex", alignItems: "center", gap: '12px', width: '50%'}}>
+                                    <label htmlFor="floorplan1">Floor Plan 1<AiOutlineFileImage/></label>
+                                    <input type="file"
+                                     id="floorplan1" 
+                                     style={{display: "none"}} 
+                                     onChange={(e) => setFloorPlan1(e.target.files[0])}
+                                    />
+                                    {photo && <p>{photo.name}</p>}
+                                </div>
+                                <div style={{display: "flex", alignItems: "center", gap: '12px', width: '50%'}}>
+                                    <label htmlFor="floorplan2">Floor Plan2<AiOutlineFileImage/></label>
+                                    <input type="file"
+                                     id="floorplan2" 
+                                     style={{display: "none"}} 
+                                     onChange={(e) => setFloorPlan2(e.target.files[0])}
                                     />
                                     {photo && <p>{photo.name}</p>}
                                 </div>

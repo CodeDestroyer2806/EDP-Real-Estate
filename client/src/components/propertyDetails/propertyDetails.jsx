@@ -69,6 +69,7 @@ const PropertyDetail = () => {
             <div className={classes.typeAndState}>
               <div>Type: <span>{`${propertyDetail?.type}`}</span></div>
               <div>State: <span>{`${propertyDetail?.state}`}</span></div>
+              <div>City: <span>{`${propertyDetail?.city}`}</span></div>
               <span>Zip Code: {`${propertyDetail?.zipCode}`}</span>
             </div> 
             <div className={classes.priceAndOwner}>

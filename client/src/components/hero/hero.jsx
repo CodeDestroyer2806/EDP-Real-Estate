@@ -3,17 +3,37 @@ import {AiOutlineSearch} from 'react-icons/ai'
 import classes from "./hero.module.css"
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { request } from '../../util/fetchAPI'
+import { stateToIdx } from '../../util/idxToState'
+
 const Hero = () => {
+  const [allProperties, setAllProperties] = useState([])
+  const [filteredProperties, setFilteredProperties] = useState([])
   const [type, setType] = useState("beach")
   const [state, setState] = useState("0")
   const [priceRange , setPriceRange] = useState("0")
+  const [query, setQuery] = useState("")
   const navigate = useNavigate()
 
 
-  const handleSearch = () => {
-    // navigagte to properties
-    navigate(`/properties?type=${type}&state=${state}&priceRange=${priceRange}`)
-  }
+  useEffect(() => {
+    const fetchAllProperties = async() => {
+      const data = await request(`/property/getAll`, 'GET')
+      setAllProperties(data)
+    }
+    fetchAllProperties()
+  }, [])
+
+
+  const handleInputChange = (event) => {
+    setQuery(event.target.value);
+}
+
+const handleSearch = () => {
+  let state = stateToIdx(query)
+  navigate(`/properties?state=${state}`)
+}
 
 
   return (
@@ -22,7 +42,8 @@ const Hero = () => {
         <h2>Find your dream place!</h2>
         <h5>Search the best selection of luxury real estate</h5>
         <div className={classes.options}>
-          <select onChange={(e) => setType(e.target.value)}>
+        <input type="text" onChange={handleInputChange} placeholder="enter search" />
+          {/* <select onChange={(e) => setType(e.target.value)}>
             <option disabled>Select Type</option>
             <option value="Beach">Beach</option>
             <option value="Mountain">Mountain</option>
@@ -88,7 +109,7 @@ const Hero = () => {
               <option value="47">West Virginia</option>
               <option value="48">Wisconsin</option>
               <option value="49">Wyoming</option>    
-              </select>
+              </select> */}
               <AiOutlineSearch onClick={handleSearch} className={classes.searchIcon}/> 
           </div> 
       </div>

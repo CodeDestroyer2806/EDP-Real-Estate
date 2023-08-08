@@ -1,4 +1,4 @@
-
+import './App.css';
 import FeaturedProperties from './components/featuredProperties/featuredProperties';
 import Newsletter from './components/newsletter/newsletter';
 import PopularProperties from './components/popularProperties/popularProperties';
@@ -10,8 +10,17 @@ import { Route, Routes } from 'react-router-dom';
 import Navbar from './components/navbar/navbar';
 import Hero from './components/hero/hero'
 import Footer from './components/footer/footer'
+import { FiSidebar } from 'react-icons/fi';
+import SideBar from "./sidebar/Sidebar"
+import { useState } from 'react';
 
 function App() {
+  const[selectedCategory, setSelectedCategory] = useState(null)
+  const handleDatachange = (newData) => {
+    setSelectedCategory(newData);
+  };
+
+
   return (
     <div>
       <Routes>
@@ -30,8 +39,9 @@ function App() {
         <Route path="/properties" element={
           <>
           <Navbar/>
-          <Properties/>
-          <Footer /> 
+          <SideBar onDataChange={handleDatachange}/>
+          <Properties data={selectedCategory}/>
+          <Footer/> 
           </>
         }/>
 
